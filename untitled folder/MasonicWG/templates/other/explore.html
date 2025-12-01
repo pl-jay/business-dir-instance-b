@@ -1,0 +1,48 @@
+{% extends 'base.html' %} {# Or your public base template, e.g., 'base_public.html' #}
+{% load static %}
+
+{% block title %}Explore Programs - {{SITE_NAME}}{% endblock %}
+
+{% block content %}
+
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Explore Our Programs</h1>
+                    <p class="lead">Discover the many ways FRDM protects your rights and serves our community.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fa-solid fa-compass" style="font-size: 6rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <!-- Programs Overview -->
+        <section class="mb-5">
+            <div class="row">
+                <div class="col-lg-10 mx-auto text-center">
+                    <h2 class="mb-4">How We Defend Freedom</h2>
+                    <p class="lead">FRDM is dedicated to protecting constitutional rights through a multi-faceted approach. Our work is centered on three core pillars: legal defense, education, and legislative advocacy.</p>
+                    <p class="text-muted">Through our <strong>Legal Defense Fund</strong>, we support landmark constitutional cases in courts across the country, fighting to protect the rights of all Americans. Our <strong>Educational Programs</strong> empower citizens, including the next generation, with a deep understanding of their rights and the importance of civic engagement. Finally, our <strong>Legislative Advocacy</strong> team works tirelessly at the federal and state levels to monitor legislation and champion laws that safeguard our freedoms.</p>
+                    <p class="text-muted">Members are the backbone of our efforts and gain access to exclusive benefits, including our monthly publications, special discounts, and invitations to community events. By joining FRDM, you directly support these vital programs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="bg-primary text-white py-5 rounded text-center">
+            <div class="container">
+                <h2 class="mb-3">Ready to Defend Freedom?</h2>
+                <p class="lead mb-4">Join millions of Americans who stand united in defense of our constitutional rights.</p>
+                <a href="" class="btn btn-light btn-lg">
+                    <i class="fa-solid fa-user-plus me-2"></i> Become a Member
+                </a>
+            </div>
+        </section>
+    </main>
+{% endblock %}

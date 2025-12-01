@@ -1,0 +1,60 @@
+{% extends 'base.html' %} {# Or your public base template, e.g., 'base_public.html' #}
+{% load static %}
+
+{% block title %}FAQ - {{SITE_NAME}}{% endblock %}
+
+{% block content %}
+
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Frequently Asked Questions</h1>
+                    <p class="lead">Find answers to common questions about FRDM membership and services.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fa-solid fa-question-circle" style="font-size: 6rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </section>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <!-- FAQ Section -->
+        <section id="faq-summary" class="mb-5">
+            <h2 class="text-center mb-4">Common Questions</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    
+                    <div class="mb-4">
+                        <h4>How do I become a FRDM member?</h4>
+                        <p>Joining is easy! You can sign up on our <a href="">membership page</a>, where you'll find several options, including annual, multi-year, and life memberships. You can also call our membership services at (800) 672-3888 to join over the phone.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>What are the main benefits of membership?</h4>
+                        <p>As a member, you'll receive a subscription to one of our monthly magazines, access to exclusive discounts on training and gear, invitations to member-only events, and the knowledge that you are supporting our critical legal and educational programs.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>How can I update my account information?</h4>
+                        <p>The best way to update your address or contact information is by logging into your online member portal. You can also contact our member services team by emailing membership@frdm.org or calling (800) 672-3888 during business hours.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Still Need Help -->
+        <section class="bg-light py-5 rounded text-center">
+            <div class="container">
+                <h3 class="mb-3">Still Need Help?</h3>
+                <p class="lead mb-4">Can't find the answer you're looking for? Our team is here to help.</p>
+                <a href="/contact/" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-envelope me-2"></i> Contact Support
+                </a>
+            </div>
+        </section>
+    </main>
+
+{% endblock %}

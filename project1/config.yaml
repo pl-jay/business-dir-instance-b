@@ -1,0 +1,35 @@
+patriot:
+  SITE_NAME: "Patriot Directory"
+  SITE_LONG_NAME: "Freedom Business Directory"
+  LOGO_LIGHT: "img/logos/FRDM_master_logo.svg"
+  LOGO_DARK: "img/logos/FRDM_master_logo_white.svg"
+  THEME_CSS: "css/styles.css"
+  ADMIN_CSS: "css/custom_admin.css"
+  PRIMARY_COLOR: "#e95454"
+  SECONDARY_COLOR: "#3d5175"
+  THEME: "light"
+
+masonic:
+  SITE_NAME: "Masonic Directory"
+  SITE_LONG_NAME: "Masonic Business Registry"
+  LOGO_LIGHT: "img/logos/FRDM_master_logo.svg"  # using default FRDM logo until custom logos provided
+  LOGO_DARK: "img/logos/FRDM_master_logo_white.svg"
+  THEME_CSS: "css/styles.css"
+  ADMIN_CSS: "css/custom_admin.css"
+  PRIMARY_COLOR: "#9e7f46"
+  SECONDARY_COLOR: "#111723"
+  THEME: "dark"
+
+precog:
+  SITE_NAME: "Precog Nexus Marketplace"
+  SITE_LONG_NAME: "Precog Nexus Marketplace"
+  LOGO_LIGHT: "img/logos/FRDM_master_logo.svg"  # placeholder logo
+  LOGO_DARK: "img/logos/FRDM_master_logo_white.svg"
+  THEME_CSS: "css/style.css"
+  ADMIN_CSS: "css/custom_admin.css"  # none provided, fallback to default
+  PRIMARY_COLOR: "#0d6efd"
+  SECONDARY_COLOR: "#001f3f"
+  THEME: "dark"
+  BASE_TEMPLATE: "base.html"
+  NAVBAR_TEMPLATE: "navbar.html"
+  FOOTER_TEMPLATE: "footer.html"

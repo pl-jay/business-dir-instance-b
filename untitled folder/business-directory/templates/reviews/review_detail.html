@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Review for {{ review.business.name }} · Patriot{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10 col-xxl-8">
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'reviews:list' %}">
+          <i class="fa-solid fa-arrow-left-long me-1"></i> Back to reviews
+        </a>
+        <a class="btn btn-outline-secondary btn-sm" href="{{ review.business.get_absolute_url }}">
+          <i class="fa-solid fa-building me-1"></i> Business page
+        </a>
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'reviews:edit' review.pk %}">
+            <i class="fa-regular fa-pen-to-square me-1"></i> Edit
+          </a>
+          {% if user == review.user %}
+            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+              <i class="fa-regular fa-trash-can me-1"></i> Delete
+            </button>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-2">Review for {{ review.business.name }}</h1>
+        <div class="small text-body-secondary mb-3">
+          by
+          {% if review.is_anonymous %}
+            {% if review.display_name %}{{ review.display_name }}{% else %}Anonymous{% endif %}
+          {% else %}
+            {{ review.user }}
+          {% endif %}
+          · {{ review.created_at|date:"Y-m-d H:i" }}
+        </div>
+
+        <div class="mb-3">
+          <span class="badge text-bg-warning-subtle">{{ review.rating }}/5</span>
+          {% if review.rating_service or review.rating_value or review.rating_quality or review.rating_cleanliness %}
+            <div class="small text-body-secondary mt-1">
+              {% if review.rating_service %}Service: {{ review.rating_service }}/5 {% endif %}
+              {% if review.rating_value %}· Value: {{ review.rating_value }}/5 {% endif %}
+              {% if review.rating_quality %}· Quality: {{ review.rating_quality }}/5 {% endif %}
+              {% if review.rating_cleanliness %}· Cleanliness: {{ review.rating_cleanliness }}/5{% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        {% if review.comment %}
+          <div class="p-3 border rounded-3 bg-body-tertiary mb-3">{{ review.comment|linebreaks }}</div>
+        {% else %}
+          <div class="text-body-secondary mb-3">No comment provided.</div>
+        {% endif %}
+
+        {% if review.attachments.all %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            {% for att in review.attachments.all %}
+              <a href="{{ att.file.url }}" target="_blank" class="me-2 small text-primary">
+                Attachment {{ forloop.counter }}
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 flex-wrap">
+          {% if user.is_authenticated %}
+            <button type="button" class="btn btn-sm btn-outline-success review-vote-btn" data-review="{{ review.id }}" data-helpful="true">
+              👍 Helpful ({{ review.helpful_count }})
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger review-vote-btn" data-review="{{ review.id }}" data-helpful="false">
+              👎 Not Helpful ({{ review.not_helpful_count}})
+            </button>
+            <a href="{% url 'reviews:report' review.id %}" class="btn btn-sm btn-outline-warning">Report</a>
+            {% if review.user_id == user.id and not review.signature_id %}
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="signReview({{ review.id }})">
+                Sign review
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# Delete modal posts to your existing delete view #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-6">Delete your review</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        This action cannot be undone. Delete your review for “{{ review.business.name }}”?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'reviews:delete' review.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fa-regular fa-trash-can me-1"></i> Confirm delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.review-vote-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const reviewId = this.dataset.review;
+        const isHelpful = this.dataset.helpful;
+        const csrftoken = getCookie('csrftoken');
+        fetch(`/reviews/${reviewId}/vote/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `is_helpful=${isHelpful}`
+        })
+          .then(response => response.ok ? response.json() : Promise.reject(response))
+          .then(data => {
+            const helpfulBtn = document.querySelector('button[data-review="' + reviewId + '"][data-helpful="true"]');
+            const unhelpfulBtn = document.querySelector('button[data-review="' + reviewId + '"][data-helpful="false"]');
+            if (helpfulBtn) helpfulBtn.innerHTML = `👍 Helpful (${data.helpful})`;
+            if (unhelpfulBtn) unhelpfulBtn.innerHTML = `👎 Not Helpful (${data.unhelpful})`;
+          })
+          .catch(err => { console.error(err); });
+      });
+    });
+  });
+</script>
+{% endblock %}

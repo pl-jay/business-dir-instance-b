@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Discover Local · Patriot{% endblock %}
+{% load static %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero mb-5" style="--hero-image: url('{% static 'img/hero.jpg' %}');">
+  <div class="hero-content">
+    <div class="container-fluid px-4">
+      <h1 class="display-5 fw-bold mb-4">Discover Local Businesses</h1>
+
+      <form
+        class="row gx-2 gy-2 justify-content-center yp-search-card mx-0"
+        method="get"
+        action="."
+      >
+        <!-- WHAT -->
+        <div class="col-12 col-md-4">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-white border-0 ps-3">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input
+              class="form-control border-0"
+              type="text"
+              name="q"
+              value="{{ q }}"
+              placeholder="Find a business"
+            />
+          </div>
+        </div>
+
+        <!-- CATEGORY -->
+        <div class="col-12 col-md-3">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-white border-0 ps-3">
+              <i class="fa-solid fa-layer-group"></i>
+            </span>
+            <select
+              class="form-select border-0"
+              name="category"
+              aria-label="Category"
+            >
+              <option value="">All categories</option>
+              {% for c in all_categories %}
+              <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>
+                {{ c }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- WHERE -->
+        <div class="col-12 col-md-3">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-white border-0 ps-3">
+              <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <input
+              class="form-control border-0"
+              type="text"
+              name="location"
+              value="{{ location }}"
+              placeholder="Near (city or address)"
+            />
+          </div>
+        </div>
+
+        <!-- FIND -->
+        <div class="col-12 col-md-2">
+          <button class="btn btn-yp w-100 btn-lg fw-bold">FIND</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+<section class="container mb-5">
+  <div class="row g-4 justify-content-center">
+    {% for c in top_categories %}
+    <div class="col-4 col-sm-3 col-md-2 text-center">
+      <a class="text-decoration-none" href="?category={{ c.category|urlencode }}">
+        <div class="yp-cat-icon d-inline-flex align-items-center justify-content-center rounded-circle mb-2">
+          {% with cat=c.category|lower %}
+          {% if "restaurant" in cat %}<i class="fa-solid fa-utensils"></i>
+          {% elif "dent" in cat %}<i class="fa-solid fa-tooth"></i>
+          {% elif "plumb" in cat %}<i class="fa-solid fa-faucet-drip"></i>
+          {% elif "contractor" in cat %}<i class="fa-solid fa-helmet-safety"></i>
+          {% elif "electric" in cat %}<i class="fa-solid fa-bolt"></i>
+          {% elif "auto" in cat or "repair" in cat %}<i class="fa-solid fa-screwdriver-wrench"></i>
+          {% elif "roof" in cat %}<i class="fa-solid fa-house-chimney"></i>
+          {% elif "attorney" in cat or "law" in cat %}<i class="fa-solid fa-scale-balanced"></i>
+          {% elif "hotel" in cat or "lodg" in cat %}<i class="fa-solid fa-hotel"></i>
+          {% else %}<i class="fa-solid fa-building"></i>
+          {% endif %}
+          {% endwith %}
+        </div>
+        <div class="small text-body">{{ c.category }}</div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="text-center text-muted">No categories yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<!-- RESULTS GRID -->
+<section class="container">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for b in items %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-1"><a href="{{ b.get_absolute_url }}">{{ b.name }}</a></h5>
+          {% if b.category %}<div class="text-muted small mb-2">{{ b.category }}</div>{% endif %}
+          {% if b.address %}<div class="small mb-2"><i
+              class="fa-solid fa-location-dot me-1"></i>{{ b.address|truncatechars:80 }}</div>{% endif %}
+          {% if b.phone %}<div class="small mb-3"><i class="fa-solid fa-phone me-1"></i>{{ b.phone }}</div>{% endif %}
+          <a class="btn btn-outline-primary btn-sm" href="{{ b.get_absolute_url }}">View details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">No businesses found.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

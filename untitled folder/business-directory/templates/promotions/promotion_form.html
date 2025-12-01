@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% load form_extras %} {# add_class filter (optional) #}
+
+{% block title %}{% if form.instance.pk %}Edit Promotion{% else %}Create Promotion{% endif %} · Patriot{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 m-0">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Promotion</h1>
+  <a class="btn btn-outline-secondary btn-sm"
+     href="{% if form.instance.pk %}{{ form.instance.get_absolute_url }}{% else %}{% url 'promotions:list' %}{% endif %}">
+    <i class="fa-solid fa-arrow-left-long me-1"></i> Back
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-4 p-md-5">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="row g-4">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.business.id_for_label }}">Business</label>
+          {{ form.business|add_class:"form-select" }}
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.title.id_for_label }}">Title</label>
+          {{ form.title|add_class:"form-control" }}
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+          {{ form.description|add_class:"form-control" }}
+          <div class="form-text">What’s the offer? Any terms or limits.</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.start_date.id_for_label }}">Start date</label>
+          {{ form.start_date|add_class:"form-control" }}
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.end_date.id_for_label }}">End date</label>
+          {{ form.end_date|add_class:"form-control" }}
+        </div>
+
+        {% if form.slug %}
+        <div class="col-12">
+          <label class="form-label" for="{{ form.slug.id_for_label }}">Slug</label>
+          {{ form.slug|add_class:"form-control" }}
+          <div class="form-text">URL-friendly; auto-filled from title (you can edit).</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a class="btn btn-outline-secondary"
+           href="{% if form.instance.pk %}{{ form.instance.get_absolute_url }}{% else %}{% url 'promotions:list' %}{% endif %}">
+          Cancel
+        </a>
+        <button class="btn btn-primary" type="submit">
+          <i class="fa-regular fa-floppy-disk me-1"></i> Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    // Auto-generate slug from title if slug field exists and user hasn't edited it
+    var titleInput = document.getElementById("{{ form.title.id_for_label }}");
+    var slugInput = document.getElementById("{{ form.slug.id_for_label }}");
+    if (titleInput && slugInput) {
+      let touched = false;
+      slugInput.addEventListener('input', () => touched = true);
+      titleInput.addEventListener('input', function () {
+        if (touched) return;
+        const v = (titleInput.value||"").toLowerCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+          .replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"").substring(0,220);
+        slugInput.value = v;
+      });
+    }
+  })();
+</script>
+{% endblock %}

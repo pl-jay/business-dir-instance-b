@@ -1,0 +1,57 @@
+{% extends 'base.html' %} {# Or your public base template, e.g., 'base_public.html' #}
+{% load static %}
+
+{% block title %}Privacy Policy - {{SITE_NAME}}{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Privacy Policy</h1>
+                    <p class="lead">Your privacy is important to us. Here’s a summary of how we protect your information.</p>
+                    <p class="mb-0"><small>Last updated: January 1, 2025</small></p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fa-solid fa-shield-halved" style="font-size: 6rem; opacity: 0.7;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                
+                <div class="text-center mb-5">
+                    <h2>Our Commitment to Your Privacy</h2>
+                    <p class="lead">This is a simplified overview of our privacy policy. For full details, please contact our privacy officer.</p>
+                </div>
+
+                <!-- Privacy Summary -->
+                <section class="mb-5">
+                    <h4>What Information We Collect</h4>
+                    <p>We collect personal information that you provide to us when you become a member, make a donation, or contact us. This includes your name, address, email, and payment details. When you visit our website, we also automatically collect technical information, such as your IP address and browsing activity, to help us improve our services.</p>
+
+                    <h4>How We Use and Share Your Information</h4>
+                    <p>Your information is used to manage your membership, process payments, send you communications and publications, and provide you with member benefits. <strong>We do not sell or rent your personal information to third parties.</strong> We only share data with trusted service providers who help us operate (like payment processors and mail houses) or when legally required to do so. These partners are bound by strict confidentiality agreements.</p>
+
+                    <h4>Your Rights and Data Security</h4>
+                    <p>We implement strong security measures, including encryption and access controls, to protect your data from unauthorized access. You have the right to access, correct, or request the deletion of your personal information. You can also opt-out of marketing communications at any time through your member portal or by using the "unsubscribe" link in our emails.</p>
+                </section>
+
+                <!-- Contact Information -->
+                <section class="mb-5">
+                    <div class="bg-light p-4 rounded">
+                        <h4 class="text-center">Contact Our Privacy Officer</h4>
+                        <p class="text-center">If you have any questions about your privacy or wish to exercise your rights, please contact us:</p>
+                        <p class="text-center mb-0"><strong>Email:</strong> privacy@frdm.org</p>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+{% endblock %}

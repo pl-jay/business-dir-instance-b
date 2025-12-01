@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}User Profiles · Patriot{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 m-0">User Profiles</h1>
+  {% if user.is_authenticated and not user.profile %}
+    <a class="btn btn-primary btn-sm" href="{% url 'usersapp:create' %}">
+      <i class="fa-solid fa-user-plus me-1"></i> Create Profile
+    </a>
+  {% endif %}
+</div>
+
+{% if profiles %}
+  <div class="row g-3 g-md-4">
+    {% for profile in profiles %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h2 class="h5 mb-1">
+              <a class="stretched-link" href="{{ profile.get_absolute_url }}">{{ profile.user.username }}</a>
+            </h2>
+            {% if profile.location %}<div class="small text-body-secondary">{{ profile.location }}</div>{% endif %}
+            {% if profile.bio %}<p class="mt-2 mb-0 text-body">{{ profile.bio|truncatewords:24 }}</p>{% endif %}
+          </div>
+        </article>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-body-secondary">No profiles yet.</div>
+{% endif %}
+{% endblock %}

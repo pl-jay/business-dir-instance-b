@@ -1,0 +1,414 @@
+{% extends 'base.html' %} {% load static %} {% block title %}
+{{ b.name }} · Patriot Directory
+{% endblock %} {% block extra_css %}
+<style>
+  .muted {
+    opacity: 0.8;
+  }
+
+  .copy-toast {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1080;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10 col-xxl-8">
+    <!-- Top actions -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'directory:list' %}"><i
+            class="fa-solid fa-arrow-left-long me-1"></i> Back</a>
+        {% if user.is_authenticated %}
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'directory:edit' slug=b.slug %}"><i
+            class="fa-regular fa-pen-to-square me-1"></i> Edit</a>
+        <a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"><i
+            class="fa-regular fa-trash-can me-1"></i> Delete</a>
+        {% comment %}
+        <a class="btn btn-outline-danger btn-sm" href="{% url 'directory:delete' slug=b.slug %}"><i
+            class="fa-regular fa-trash-can me-1"></i> Delete</a>
+        {% endcomment %}
+        {% endif %}
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="copyLinkBtn"><i
+            class="fa-regular fa-copy me-1"></i> Copy link</button>
+        {% if b.website %}
+        <a class="btn btn-primary btn-sm" href="{{ b.website }}" target="_blank" rel="noopener"><i
+            class="fa-solid fa-arrow-up-right-from-square me-1"></i> Visit website</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-3">
+      <h1 class="h2 mb-1">{{ b.name }} </h1>
+      {% include 'directory/partials/_business_badges.html' with business=b top_rated_ids=top_rated_ids
+      most_reviewed_ids=most_reviewed_ids %}
+      {% if b.category %}
+      <span class="badge text-bg-secondary">{{ b.category }}</span>
+      {% endif %} {# Show average rating if available #} {% if average_rating %}
+      <div class="mt-2">
+        <span class="badge text-bg-warning-subtle">Average rating: {{ average_rating|floatformat:1 }}/5</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Business card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        {% if b.description %}
+        <p class="mb-4">{{ b.description|linebreaks }}</p>
+        {% else %}
+        <p class="text-body-secondary mb-4">No description provided.</p>
+        {% endif %}
+
+        <div class="row g-4">
+          <div class="col-12 col-md-6">
+            <ul class="list-unstyled m-0">
+              {% if b.address %}
+              <li class="mb-3">
+                <div class="fw-semibold mb-1">
+                  <i class="fa-solid fa-location-dot me-2"></i>Address
+                </div>
+                <div>
+                  {{ b.address }}
+                  <a class="ms-2 small" target="_blank" rel="noopener"
+                    href="https://maps.google.com/?q={{ b.address|urlencode }}">(Map)</a>
+                </div>
+              </li>
+              {% endif %} {% if b.phone %}
+              <li class="mb-3">
+                <div class="fw-semibold mb-1">
+                  <i class="fa-solid fa-phone me-2"></i>Phone
+                </div>
+                <div>
+                  <a href="tel:{{ b.phone|urlencode }}">{{ b.phone }}</a>
+                </div>
+              </li>
+              {% endif %} {% if b.website %}
+              <li class="mb-3">
+                <div class="fw-semibold mb-1">
+                  <i class="fa-solid fa-globe me-2"></i>Website
+                </div>
+                <div>
+                  <a href="{{ b.website }}" target="_blank" rel="noopener">{{ b.website }}</a>
+                </div>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="p-3 border rounded-3 h-100">
+              <div class="fw-semibold mb-2">Quick actions</div>
+              <div class="d-flex flex-wrap gap-2">
+                {% if b.phone %}
+                <a class="btn btn-sm btn-outline-primary" href="tel:{{ b.phone|urlencode }}"><i
+                    class="fa-solid fa-phone me-1"></i> Call</a>
+                {% endif %} {% if b.address %}
+                <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"
+                  href="https://maps.google.com/?q={{ b.address|urlencode }}"><i
+                    class="fa-solid fa-location-dot me-1"></i> Directions</a>
+                {% endif %} {% if b.website %}
+                <a class="btn btn-sm btn-outline-primary" href="{{ b.website }}" target="_blank" rel="noopener">
+                  <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>
+                  Open site
+                </a>
+                {% endif %}
+              </div>
+
+              <div class="small text-body-secondary mt-3">Added on {{ b.created_at|date:'Y-m-d' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Additional related sections: On‑Chain records, promotions and rankings #}
+    {% if onchain_records or promotions or rankings %}
+    <div class="mb-4">
+      {% if onchain_records %}
+      <h5 class="mt-4">OnChain</h5>
+      <ul class="list-group">
+        {% for row in onchain_rows %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            {% if row.kind == 'SIGNED_REVIEW' %}
+            <span class="badge text-bg-info me-2">SIGNED_REVIEW</span>
+            Review #{{ row.review_id }}
+            {% else %}
+            <span class="badge text-bg-secondary me-2">TX_LINKED</span>
+            {{ row.chain }} — {{ row.tx_hash|slice:':12' }}…
+            {% endif %} {% if row.note %}
+            <div class="text-muted small">{{ row.note }}</div>
+            {% endif %}
+          </div>
+          <div>
+            {% if row.tx_hash and row.chain %}
+            <a class="btn btn-sm btn-outline-primary" href="{{ ONCHAIN_EXPLORERS.row.chain }}{{ row.tx_hash }}"
+              target="_blank">Explorer</a>
+            {% endif %}
+          </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No activity yet.</li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% if promotions %}
+      <h2 class="h4 mb-2">Promotions</h2>
+      <ul class="list-unstyled ps-3 mb-3">
+        {% for p in promotions %}
+        <li class="mb-1">
+          <a href="{{ p.get_absolute_url }}">{{ p.title }}</a>
+          <span class="text-body-secondary small">({{ p.start_date }} – {{ p.end_date }})</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% if rankings %}
+      <h2 class="h4 mb-2">Rankings</h2>
+      <ul class="list-unstyled ps-3">
+        {% for rank in rankings %}
+        <li class="mb-1">
+          Score: {{ rank.score }} {% if rank.comment %}
+          – {{ rank.comment|truncatewords:12 }}
+          {% endif %}
+          <a href="{{ rank.get_absolute_url }}" class="ms-1 small">View</a>
+        </li>
+        {% if forloop.counter0 < 10 %} <span class="badge text-bg-warning">⭐ Top Rated</span>
+          {% endif %} {% if business.reviews_30d and business.rank_most_30d < 10 %} <span class="badge text-bg-danger">
+            🔥 Most Reviewed</span>
+            {% endif %}
+            {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Reviews header + add button -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="h4 m-0">Reviewss</h2>
+
+      {% if user.is_authenticated %}
+      {% if is_owner %}
+      <span class="badge text-bg-success">You’re the owner</span>
+      {% else %}
+      {% if not user_review %}
+      <a class="btn btn-sm btn-primary" href="{% url 'reviews:create_for_business' business_slug=b.slug %}"><i
+          class="fa-regular fa-star me-1"></i> Add a review</a>
+      {% endif %}
+      {% endif %}
+      {% else %}
+      <span class="text-body-secondary small">Log in to add a review.</span>
+      {% endif %}
+    </div>
+
+    <!-- Reviews list -->
+    {% if reviews %}
+    <div class="vstack gap-3">
+
+      {% comment %} Reviews list inside Business Detail {% endcomment %}
+      {% for r in reviews %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-semibold">by {{ r.user.username }}</div>
+              <div class="small text-body-secondary">{{ r.created_at|date:'Y-m-d H:i' }}</div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap text-end">
+              <div class="badge text-bg-warning-subtle">{{ r.rating }}/5</div>
+
+              {# --- Wallet chips --- #}
+              {% if r.signature_id %}
+              <span class="badge text-bg-success">
+                Signed by wallet —
+                {{ r.signature.signer_address|slice:":10" }}…{{ r.signature.signer_address|slice:"-4:" }}
+              </span>
+              {% elif r.author_has_wallet %}
+              <span class="badge text-bg-primary">Wallet linked</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <p class="mt-3 mb-0">{{ r.comment|linebreaksbr }}</p>
+
+          {# --- Community actions (vote/report) with author/owner guard --- #}
+          {% if user.is_authenticated and user.id != r.user_id and user.id != b.owner_id %}
+          {# Authenticated, not author, not business owner → ENABLED #}
+          <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-success review-vote-btn" data-review="{{ r.id }}"
+              data-helpful="true">
+              👍 Helpful ({{ r.helpful_count }})
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger review-vote-btn" data-review="{{ r.id }}"
+              data-helpful="false">
+              👎 Not Helpful ({{ r.not_helpful_count}})
+            </button>
+
+
+            {% if user.is_authenticated and user.id != r.user_id and user.id != b.owner_id %}
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'reviews:report' r.pk %}">
+              <i class="fa-regular fa-flag me-1"></i> Report
+            </a>
+            {% else %}
+            <button class="btn btn-sm btn-outline-danger" disabled aria-disabled="true">Report</button>
+            {% endif %}
+
+          </div>
+          {% else %}
+          {# DISABLED (guest, author, or business owner) #}
+          <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+
+            {% if user.is_authenticated and user.id == r.user_id %}
+            <span class="small text-body-secondary">You can’t vote or report your own review.</span>
+            {% elif user.is_authenticated and user.id == b.owner_id %}
+            <span class="small text-body-secondary">Business owners can’t vote or report.</span>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# --- Actions for the review author --- #}
+          {% if user.is_authenticated and user.id == r.user_id %}
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'reviews:edit' r.pk %}">Edit</a>
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'reviews:delete' r.pk %}">Delete</a>
+
+            {# Sign review only if not already signed #}
+            {% if not r.signature_id %}
+
+            <button id="sign-btn-{{ r.id }}" class="btn btn-sm btn-outline-primary js-sign-btn"
+              onclick="signReview({{ r.id }})">
+              <i class="fa-regular fa-pen-to-square me-1"></i>
+              {% if not request.user.wallets.exists %}disabled title="Connect your wallet first" {% endif %}>
+              Sign review
+            </button>
+            <span class="badge text-bg-success d-none js-signed-chip ms-2"></span>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# --- OWNER REPLY BLOCK --- #}
+          {% if r.owner_reply %}
+          <div class="mt-3 p-3 border rounded-3 bg-body-tertiary">
+            <div class="fw-semibold mb-1">Owner reply</div>
+            <p class="mb-2">{{ r.owner_reply.text|linebreaksbr }}</p>
+
+
+            {% if user.is_authenticated and user.id == b.owner_id %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'reviews:reply_edit' r.owner_reply.pk %}">Edit
+              reply</a>
+            {% endif %}
+          </div>
+          {% else %}
+          {% if is_owner %}
+          <div class="mt-3">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'reviews:reply_create' review_id=r.pk %}">Reply to
+              this review</a>
+          </div>
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted">No reviews yet for this business.</p>
+      {% endfor %}
+
+
+    </div>
+    {% else %}
+    <div class="text-body-secondary">No reviews yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+{# Confirmation Modal #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Delete “{{ b.name }}”</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">This action cannot be undone. Are you sure you want to delete this business?</div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+        <form method="post" action="{% url 'directory:delete' slug=b.slug %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger"><i class="fa-regular fa-trash-can me-1"></i> Confirm
+            delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Copy-link toast -->
+<div class="toast align-items-center text-bg-dark border-0 copy-toast" id="linkToast" role="status" aria-live="polite"
+  aria-atomic="true">
+  <div class="d-flex">
+    <div class="toast-body">Link copied to clipboard</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+      aria-label="Close"></button>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  ; (function () {
+    const btn = document.getElementById('copyLinkBtn')
+    if (btn && navigator.clipboard) {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href)
+          const el = document.getElementById('linkToast')
+          if (el) new bootstrap.Toast(el, { delay: 1500 }).show()
+        } catch (e) {
+          console.warn(e)
+        }
+      })
+    }
+  })()
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.review-vote-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const reviewId = this.dataset.review;
+        const isHelpful = this.dataset.helpful;
+
+        console.log('Voting', { reviewId });
+        const csrftoken = getCookie('csrftoken');
+        fetch(`/reviews/${reviewId}/vote/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `is_helpful=${isHelpful}`
+        })
+          .then(response => response.ok ? response.json() : Promise.reject(response))
+          .then(data => {
+            const helpfulBtn = document.querySelector('button[data-review="' + reviewId + '"][data-helpful="true"]');
+            const unhelpfulBtn = document.querySelector('button[data-review="' + reviewId + '"][data-helpful="false"]');
+            if (helpfulBtn) helpfulBtn.innerHTML = `👍 Helpful (${data.helpful})`;
+            if (unhelpfulBtn) unhelpfulBtn.innerHTML = `👎 Not Helpful (${data.unhelpful})`;
+          })
+          .catch(err => { console.error(err); });
+      });
+    });
+  });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg py-3 glass-navbar">
+  <div class="container">
+    <div class="logo-container d-flex align-items-center">
+      <div class="precog-logo me-3">
+        <div class="logo-outer-hexagon">
+          <div class="logo-inner-hexagon">
+            <div class="logo-center-star"></div>
+          </div>
+        </div>
+      </div>
+      <a class="navbar-brand precog-brand" href="{% url 'marketplace:marketplace_list' %}">
+        <span class="brand-line-1">PRECOG</span>
+        <span class="brand-line-2">NEXUS</span>
+      </a>
+    </div>
+    <button class="navbar-toggler shadow-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse pt-3 pb-2 py-lg-0 w-100" id="navigation">
+      <ul class="navbar-nav ms-auto d-flex align-items-center">
+        <li class="nav-item mx-2">
+          <a class="nav-link ps-2 d-flex align-items-center glass-card px-3 py-2" href="{% url 'marketplace:marketplace_list' %}" style="color: var(--text-primary); transition: all 0.3s ease;">
+            <i class="fa-solid fa-store me-2" style="color: var(--primary-cyan);"></i> 
+            <span style="font-weight: 500;">Marketplace</span>
+          </a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item mx-2">
+            <a class="nav-link ps-2 d-flex align-items-center glass-card px-3 py-2" href="{% url 'cart:cart' %}" id="cartButton" style="color: var(--text-primary); transition: all 0.3s ease; position: relative;">
+              <i class="fa-solid fa-shopping-cart me-2" style="color: var(--primary-cyan);"></i> 
+              <span style="font-weight: 500;">Cart</span>
+              <span class="badge ms-1 cart-badge">0</span>
+            </a>
+          </li>
+          <li class="nav-item mx-2 dropdown">
+            <a class="nav-link ps-2 d-flex align-items-center dropdown-toggle glass-card px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--text-primary); transition: all 0.3s ease;">
+              <i class="fa-solid fa-user me-2" style="color: var(--primary-cyan);"></i> 
+              <span style="font-weight: 500;">
+                {% if user.first_name %}
+                  {{ user.first_name|truncatechars:10 }} ({{ user.username }})
+                {% else %}
+                  {{ user.username|truncatechars:10 }}
+                {% endif %}
+              </span>
+            </a>
+            <ul class="dropdown-menu glass-card" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 15px; box-shadow: 0 8px 32px var(--glass-shadow);">
+              <!-- <li><a class="dropdown-item" href="{% url 'products:product_list' %}">
+                <i class="fa-solid fa-box me-2"></i> My Products
+              </a></li>
+              <li><a class="dropdown-item" href="{% url 'orders:seller_orders' %}">
+                <i class="fa-solid fa-shopping-bag me-2"></i> My Orders
+              </a></li>
+              <li><a class="dropdown-item" href="{% url 'orders:buyer_orders' %}">
+                <i class="fa-solid fa-shopping-cart me-2"></i> My Purchases
+              </a></li>
+              <li><a class="dropdown-item" href="{% url 'sales_dashboard:dashboard' %}">
+                <i class="fa-solid fa-chart-line me-2"></i> Sales Dashboard
+              </a></li> -->
+              <li><a class="dropdown-item" href="{% url 'orders:buyer_orders' %}" style="color: var(--text-primary); transition: all 0.3s ease;">
+                <i class="fa-solid fa-shopping-bag me-2" style="color: var(--primary-cyan);"></i> Buyer Dashboard
+              </a></li>
+              <li><a class="dropdown-item" href="{% url 'sellers:seller_dashboard' %}" style="color: var(--text-primary); transition: all 0.3s ease;">
+                <i class="fa-solid fa-store me-2" style="color: var(--primary-cyan);"></i> Seller Dashboard
+              </a></li>
+              <li><hr class="dropdown-divider" style="border-color: var(--glass-border);"></li>
+              <li><a class="dropdown-item" href="{% url 'password_change' %}" style="color: var(--text-primary); transition: all 0.3s ease;">
+                <i class="fa-solid fa-key me-2" style="color: var(--primary-cyan);"></i> Change Password
+              </a></li>
+              <li>
+                <form method="post" action="{% url 'sso_logout' %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start" style="color: var(--text-primary); transition: all 0.3s ease;">
+                    <i class="fa-solid fa-sign-out-alt me-2" style="color: var(--primary-cyan);"></i> Logout
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item mx-2">
+            <a class="nav-link ps-2 d-flex align-items-center glass-card px-3 py-2" href="{% url 'oidc_authentication_init' %}" style="color: var(--text-primary); transition: all 0.3s ease;">
+              <i class="fa-solid fa-sign-in-alt me-2" style="color: var(--primary-cyan);"></i> 
+              <span style="font-weight: 500;">Login with Precog SSO</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

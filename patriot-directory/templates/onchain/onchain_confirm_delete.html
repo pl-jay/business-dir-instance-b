@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete On‑Chain Record · Patriot{% endblock %}
+{% block content %}
+<h1>Delete On‑Chain Record</h1>
+<p>Are you sure you want to delete the on‑chain record for "{{ object.business.name }}"?</p>
+<form method="post">
+  {% csrf_token %}
+  <div class="actions">
+    <button class="btn primary" type="submit">Confirm</button>
+    <a class="btn" href="{{ object.get_absolute_url }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

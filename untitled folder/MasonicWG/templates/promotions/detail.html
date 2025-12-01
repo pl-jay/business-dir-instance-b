@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}{{ promo.title }} — {{ promo.business.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-7">
+      <div class="card p-3 mb-3">
+        <h3 class="mb-1">{{ promo.title }}</h3>
+        <p class="text-muted mb-2">{{ promo.business.name }}</p>
+        <p>{{ promo.description|linebreaks }}</p>
+        {% if not promo.is_open %}
+        <div class="alert alert-secondary mb-0"><i class="fa fa-info-circle"></i> Promo is not currently open.</div>
+        {% endif %}
+      </div>
+
+      <div class="card p-3">
+        <h5 class="mb-3">Claim with your wallet</h5>
+        <div class="d-flex gap-2">
+          <input id="walletAddress" class="form-control" placeholder="0x... (auto-fills if connected)" />
+          <button id="checkBtn" class="btn btn-outline-secondary btn-sm">Check eligibility</button>
+        </div>
+        <div id="eligibilityBox" class="mt-3"></div>
+        <div class="mt-3">
+          <button id="claimBtn" class="btn btn-primary btn-sm" disabled>Sign & Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="alert alert-info">
+        <i class="fa fa-key"></i>
+        This promo is token-gated. Holders of the required token/NFT can claim once per wallet.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+
+  console.log("[promo] script loaded");
+  document.addEventListener("DOMContentLoaded", () => console.log("[promo] DOM ready"));
+
+  // ---- helpers -------------------------------------------------------------
+  const $ = (id) => document.getElementById(id);
+
+  function getCookie(name) {
+    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? decodeURIComponent(m.pop()) : "";
+  }
+
+  function show(boxId, kind, text) {
+    const el = $(boxId);
+    el.className = kind;          // e.g. "alert alert-success"
+    el.innerHTML = text;
+  }
+
+  async function ensureAccount(eth) {
+    // Try silent first
+    try {
+      const a = await eth.request({ method: "eth_accounts" });
+      if (a && a[0]) return a[0];
+    } catch (_) { }
+    // Prompt connect
+    const a = await eth.request({ method: "eth_requestAccounts" });
+    return a && a[0] ? a[0] : "";
+  }
+
+  // ---- main wiring ---------------------------------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const eth = window.ethereum;
+    const walletInput = $("walletAddress");
+    const checkBtn = $("checkBtn");
+    const claimBtn = $("claimBtn");
+    const boxId = "eligibilityBox";
+
+    const eligibilityUrl = "{% url 'promotions:eligibility' promo.pk %}";
+    const claimUrl = "{% url 'promotions:claim' promo.pk %}";
+    const csrftoken = getCookie("csrftoken");
+
+    // Default UI state
+    claimBtn.disabled = true;
+
+    // Handle no wallet provider
+    if (!eth) {
+      show(boxId, "alert alert-warning",
+        'No wallet detected. Install MetaMask or a compatible wallet.');
+      checkBtn.disabled = true;
+      claimBtn.disabled = true;
+      return;
+    }
+
+    // Autofill wallet if available
+    (async () => {
+      try {
+        const a = await eth.request({ method: "eth_accounts" });
+        if (a && a[0]) walletInput.value = a[0];
+      } catch (_) { }
+    })();
+
+    // React to account changes
+    if (eth.on) {
+      eth.on("accountsChanged", (accs) => {
+        walletInput.value = accs && accs[0] ? accs[0] : "";
+        claimBtn.disabled = true; // recheck before claiming with new account
+        show(boxId, "alert alert-info", "Wallet changed. Please check eligibility again.");
+      });
+    }
+
+    // --- Check eligibility ---------------------------------------------------
+    checkBtn.addEventListener("click", async () => {
+      try {
+        // If the input is empty, attempt to connect/resolve an account
+        let w = walletInput.value.trim();
+        if (!w) {
+          w = await ensureAccount(eth);
+          walletInput.value = w || "";
+        }
+
+        if (!w || !w.startsWith("0x") || w.length !== 42) {
+          show(boxId, "alert alert-danger", "Please enter or connect a valid wallet address.");
+          claimBtn.disabled = true;
+          return;
+        }
+
+        checkBtn.disabled = true;
+        show(boxId, "alert alert-secondary", "Checking eligibility…");
+
+        const r = await fetch(`${eligibilityUrl}?wallet=${encodeURIComponent(w)}`, {
+          credentials: "same-origin",
+        });
+        const js = await r.json();
+
+        if (r.ok && js.ok) {
+          show(boxId, "alert alert-success", "Eligible ✅ You can claim now.");
+          claimBtn.disabled = false;
+        } else {
+          show(boxId, "alert alert-danger", `Not eligible: ${js.error || "Unknown"}`);
+          claimBtn.disabled = true;
+        }
+      } catch (e) {
+        console.error(e);
+        show(boxId, "alert alert-danger", "Could not check eligibility. See console for details.");
+        claimBtn.disabled = true;
+      } finally {
+        checkBtn.disabled = false;
+      }
+    });
+
+    // --- Claim (sign + POST) -------------------------------------------------
+    claimBtn.addEventListener("click", async () => {
+      try {
+        let w = walletInput.value.trim();
+        if (!w) {
+          w = await ensureAccount(eth);
+          walletInput.value = w || "";
+        }
+        if (!w || !w.startsWith("0x") || w.length !== 42) {
+          show(boxId, "alert alert-danger", "Invalid wallet address.");
+          return;
+        }
+
+        claimBtn.disabled = true;
+        show(boxId, "alert alert-secondary", "Requesting signature…");
+
+        const message = `Claim promo #{{ promo.pk }} at {{ request.get_host }} for ${w}`;
+
+        // personal_sign: [message, address]
+        const signature = await eth.request({
+          method: "personal_sign",
+          params: [message, w],
+        });
+
+        show(boxId, "alert alert-secondary", "Submitting claim…");
+
+        const form = new FormData();
+        form.append("wallet", w);
+        form.append("message", message);
+        form.append("signature", signature);
+
+        const r = await fetch(claimUrl, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "X-CSRFToken": csrftoken },
+          body: form,
+        });
+        const js = await r.json();
+
+        if (r.ok && js.ok) {
+          const extra = js.code ? ` Your code: <strong>${js.code}</strong>` : "";
+          show(boxId, "alert alert-success", `Claimed 🎉${extra}`);
+        } else {
+          show(boxId, "alert alert-danger", `Claim failed: ${js.error || "Unknown"}`);
+          claimBtn.disabled = false; // allow retry
+        }
+      } catch (e) {
+        console.error(e);
+        show(boxId, "alert alert-danger", "Signature cancelled or failed.");
+        claimBtn.disabled = false;
+      }
+    });
+  });
+
+</script>
+{% endblock %}

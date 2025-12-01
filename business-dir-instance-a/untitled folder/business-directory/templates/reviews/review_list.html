@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reviews · Patriot {%endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10 col-xxl-9">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h3 mb-0">Reviews</h1>
+      <div class="text-body-secondary small">
+        Create a review from the business page.
+      </div>
+    </div>
+
+    {% if reviews %}
+    <div class="row g-3 g-md-4">
+      {% for review in reviews %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+            <div>
+              {% if review.is_anonymous %}
+              {% if review.display_name %}
+              <strong>{{ review.display_name }}</strong>
+              {% else %}
+              <strong>Anonymous</strong>
+              {% endif %}
+              {% else %}
+              <strong>{{ review.user }}</strong>
+              {% endif %}
+              <span class="text-muted">· {{ review.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              {% if review.signature_id %}
+              <span class="badge text-bg-success">
+                Signed by wallet — {{ review.signature.signer_address|slice:":10" }}…{{
+                review.signature.signer_address|slice:"-4:" }}
+              </span>
+              {% elif review.author_has_wallet %}
+              <span class="badge text-bg-primary">Wallet linked</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="mb-2">
+            <span class="badge text-bg-warning-subtle">{{ review.rating }}/5</span>
+            {% if review.rating_service or review.rating_value or review.rating_quality or review.rating_cleanliness %}
+            <div class="small text-body-secondary mt-1">
+              {% if review.rating_service %}Service: {{ review.rating_service }}/5 {% endif %}
+              {% if review.rating_value %}· Value: {{ review.rating_value }}/5 {% endif %}
+              {% if review.rating_quality %}· Quality: {{ review.rating_quality }}/5 {% endif %}
+              {% if review.rating_cleanliness %}· Cleanliness: {{ review.rating_cleanliness }}/5{% endif %}
+            </div>
+            {% endif %}
+          </div>
+          {% if review.comment %}
+          <div class="mb-3 p-3 border rounded-3 bg-body-tertiary">{{ review.comment|linebreaks }}</div>
+          {% endif %}
+          {% if review.attachments.exists %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            {% for att in review.attachments.all %}
+            <a href="{{ att.file.url }}" target="_blank" class="me-2 small text-primary">
+              Attachment {{ forloop.counter }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-sm btn-outline-success review-vote-btn" data-review="{{ review.id }}"
+              data-helpful="true">
+              👍 Helpful ({{ review.helpful_count }})
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger review-vote-btn" data-review="{{ review.id }}"
+              data-helpful="false">
+              👎 Not Helpful ({{ review.not_helpful_count }})
+            </button>
+            <a href="{% url 'reviews:report' review.id %}" class="btn btn-sm btn-outline-warning">Report</a>
+            {% if request.user.is_authenticated and review.user_id == request.user.id and not review.signature_id %}
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="signReview({{ review.id }})">
+              Sign review
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted">No reviews yet.</p>
+      {% endfor %}
+
+      {% if is_paginated %}
+      <nav>
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+          {% endif %}
+          <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of
+              {{ page_obj.paginator.num_pages }}</span></li>
+          {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+    </div>
+    {% else %}
+    <div class="text-body-secondary">No reviews yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  // Helper to get CSRF token from cookies
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.review-vote-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const reviewId = this.dataset.review;
+        const isHelpful = this.dataset.helpful;
+        const csrftoken = getCookie('csrftoken');
+        fetch(`/reviews/${reviewId}/vote/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `is_helpful=${isHelpful}`
+        })
+          .then(response => response.ok ? response.json() : Promise.reject(response))
+          .then(data => {
+            // Update the counts on both buttons within this card
+            const card = btn.closest('.card');
+            if (!card) return;
+            const helpfulBtn = card.querySelector('button[data-helpful="true"]');
+            const unhelpfulBtn = card.querySelector('button[data-helpful="false"]');
+            if (helpfulBtn) {
+              helpfulBtn.innerHTML = `👍 Helpful (${data.helpful})`;
+            }
+            if (unhelpfulBtn) {
+              unhelpfulBtn.innerHTML = `👎 Not Helpful (${data.unhelpful})`;
+            }
+          })
+          .catch(err => { console.error(err); });
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% comment %}Shared chips for business cards{% endcomment %}
+{% if business.id in top_rated_ids %}
+<span class="badge text-bg-warning">⭐ Top Rated</span>
+{% endif %}
+{% if business.id in most_reviewed_ids %}
+<span class="badge text-bg-danger">🔥 Most Reviewed</span>
+{% endif %}
+{% if business.owner_id == request.user.id and request.user.wallets.exists %}
+<span class="badge text-bg-primary">Wallet linked</span>
+{% endif %}

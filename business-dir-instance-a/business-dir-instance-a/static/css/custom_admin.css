@@ -1,0 +1,375 @@
+/* @media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #c43d10;
+        --primary-fg: #f7f7f7;
+        --body-fg: #eeeeee;
+        --body-bg: #121212;
+        --body-quiet-color: #d0d0d0;
+        --body-medium-color: #e0e0e0;
+        --body-loud-color: #ffffff;
+        --breadcrumbs-link-fg: #e0e0e0;
+        --breadcrumbs-bg: var(--primary);
+        --link-fg: #c87108;
+        --link-hover-color: #953293;
+        --link-selected-fg: #6f94c6;
+        --hairline-color: #272727;
+        --border-color: #353535;
+        --error-fg: #e35f5f;
+        --message-success-bg: #006b1b;
+        --message-warning-bg: #583305;
+        --message-error-bg: #570808;
+        --darkened-bg: #212121;
+        --selected-bg: #1b1b1b;
+        --selected-row: #369a1d;
+        --close-button-bg: #333333;
+        --close-button-hover-bg: #666666;
+        color-scheme: dark;
+    }
+} */
+
+/* your_app_name/static/admin/css/custom_admin_theme.css */
+
+/* Light Mode Defaults (and base for dark mode) */
+
+/* html[data-theme="light"], */
+/* Dark Mode Overrides */
+
+@font-face {
+  font-family: 'Baskerville Semibold';
+  src: url('/static/fonts/Baskerville-Semibold.ttf') format('ttf');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham Bold Italic';
+  src: url('/static/fonts/Gotham-BoldItalic.ttf') format('ttf');
+  font-weight: bold;
+  font-style: italic;
+}
+
+/* Apply the font globally */
+body, html {
+  font-family: 'Baskerville Semibold', 'Gotham Bold Italic', serif;
+  font-size: 1rem !important;
+}
+
+html[data-theme="dark"] {
+    
+    #user-tools a,
+    #user-tools a:link,
+    #user-tools a:visited {
+        color: #FFFFFF !important; /* White text for "View site", "Change password" */
+    }
+
+    #user-tools a:hover {
+        color: #DDDDDD !important; /* Slightly off-white or a light gray for hover, optional */
+    }
+
+    /* Target the "Log out" button text */
+    #user-tools #logout-form button[type="submit"] {
+        color: #FFFFFF !important; /* White text for "Log out" button */
+        background-color: transparent; /* Make background transparent if it inherited a color */
+        border: none; /* Remove border if it inherited one */
+        /* Add other styling as needed to make it look like a link if desired */
+        /* padding: 0; */
+        /* text-decoration: underline; */
+        /* cursor: pointer; */
+    }
+
+    #user-tools #logout-form button[type="submit"]:hover {
+        color: #DDDDDD !important; /* Slightly off-white or a light gray for hover, optional */
+        /* text-decoration: none; */ /* Optional: remove underline on hover */
+    }
+
+    /* Target the Theme Toggle Button and its icons */
+    #user-tools .theme-toggle {
+        color: #FFFFFF !important; /* This makes the SVG icon color white */
+        background-color: transparent; /* Ensure no unwanted background */
+        border: none; /* Ensure no unwanted border */
+    }
+
+    #user-tools .theme-toggle:hover {
+        color: #DDDDDD !important; /* Optional: slightly off-white on hover */
+    }
+
+    /*
+       The theme toggle button uses SVGs with <use xlink:href="#icon-moon"> etc.
+       The 'color' property on the button itself should control the fill of these SVGs
+       if they are designed to inherit color (which Django's default ones are).
+       If for some reason the SVGs are not turning white, you might need a more specific target,
+       but the above should generally work.
+    */
+
+    /*
+       If you also want the "Welcome, admin" text to be white:
+    */
+    #user-tools {
+         color: #FFFFFF !important; /* This will make "Welcome, admin" white */
+    }
+    /* Dark Mode: Backgrounds */
+    --primary: #9e7f46;
+    --primary-hover: #bca375;
+    --body-bg: #111723;
+    --header-bg: #1c2843;
+    --header-link-color: #9e7f46;
+    --nav-sidebar-bg: #111723;
+    --module-header-bg: #111723;
+    --card-bg: #161c29;
+
+    /* Dark Mode: Text & Links */
+    --body-fg: #EAEAEB;
+    --secondary-fg: #9A9A9E;
+    /* --link-fg: #FF5555; /* Brighter red for dark bg or use #EB1616 */
+    /* --link-hover-color: #FF7F7F; */
+    /* --link-selected-fg: #FF5555; */
+    /* Keeping link colors same as light mode as requested, but test for visibility */
+    --link-fg: var(--primary);
+    --link-hover-color: var(--primary); /* This might be too dark on a dark BG, consider lightening it */
+    /* Maybe for dark mode link hover: --link-hover-color: #F05050; */
+    --link-selected-fg: var(--primary);
+    --header-branding-color: var(--primary);
+
+    /* Button colors might be the same if they contrast well on dark, or adjust if needed */
+    /* --button-bg: #EB1616; (already set) */
+    /* --button-fg: #FFFFFF; (already set) */
+    /* --button-hover-bg: #C01414; (already set) */
+
+    --delete-button-bg: #B22222; /* Darker, more somber red for dark mode delete */
+    --delete-button-hover-bg: #8B0000;
+
+
+    /* Dark Mode: Accents & Borders */
+    --hairline-color: #3A3A3C;
+    --selected-row-bg: #c7a86f; /* Dark, desaturated red for selection */
+
+    /* Dark Mode Message Colors (Example) */
+    --message-success-bg: #1E4620;
+    --message-success-fg: #D4EDDA;
+    --message-warning-bg: #594A19;
+    --message-warning-fg: #FFF3CD;
+    --message-error-bg: #5A1E1E; /* Background for error message */
+    --message-error-fg: #F8D7DA; /* Text for error message */
+    --selected-row: #313131;;
+
+    /* --button-bg: #790e0e; */
+
+    --button-bg: #0b1d3a;/* #946c1e;*/
+
+    --default-button-bg: var(--primary);
+
+    --button-bg: var(--primary);; /* Dark Gold/Bronze */
+    --button-fg: #FFFFFF; /* Assuming white text */
+    --button-hover-bg: var(--primary-hover); /* SLIGHTLY DARKER Gold/Bronze for hover */
+    --button-hover-fg: #FFFFFF; /* Text color on hover, usually same */
+
+    /* --- "Default" Action Button Colors (e.g., Save) --- */
+    --default-button-bg: var(--primary); /* Dark Red */
+    --default-button-fg: #FFFFFF; /* Assuming white text */
+    --default-button-hover-bg: var(--primary-hover); /* SLIGHTLY DARKER Red for hover */
+    --default-button-hover-fg: #FFFFFF; /* Text color on hover, usually same */
+
+    /* --body-quiet-color: #B22222; */
+    /* : #205067; */
+
+    .aligned .selector-chosen-title label {
+        color: #d9dec8;
+      }
+
+      .selector-chosen-title {
+        background: var(--primary);
+        color: #FFF;
+      }
+
+
+      .object-tools a:link, .object-tools a:visited {
+        background: #D4EDDA;
+        color: #000;
+        font-weight: 600;
+      }
+
+      .object-tools a:link, .object-tools a:visited {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .object-tools a.addlink{
+        background-image: url(../img/tooltag-add.svg);
+        background-repeat: no-repeat;
+        background-position: right 7px center;
+        /* padding-right: 26px; */
+      }
+
+      .object-tools a:hover {
+        background: var(--selected-row-bg); /*#b52f45;*/
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .object-tools a.addlink:hover{
+        background-image: url(../img/tooltag-add.svg);
+        background-repeat: no-repeat;
+        background-position: right 7px center;
+      }
+
+      .fieldset-heading{
+        font-weight: bold;
+      }
+
+      /* #content, body{
+        background: #151313;
+      } */
+
+      /* input[type=text]:focus {
+        border: 3px solid rgb(227, 5, 5)616;
+      } */
+
+      input:not([type]), input[type="checkbox"], input[type="text"], input[type="password"], input[type="email"], 
+      input[type="url"], input[type="number"], input[type="tel"], textarea, select, .vTextField, .select2-selection  {
+        background-color: #151313;
+      }
+      /* input[type=text]:focus {
+        border: 3px solid #555;
+      } */
+      /* input:not([type]), input[type="checkbox"]:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, 
+      input[type="url"]:focus, input[type="number"]:focus, input[type="tel"]:focus, textarea:focus, select:focus, .vTextField:focus
+      , .select2-selection:active, .select2:active, .select2-container--focus {
+        border: 1px solid #a21616 !important; 
+      } */
+
+        input:not([type]):focus, /* For inputs without a type attribute, if any */
+        input[type="checkbox"]:focus,
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        input[type="url"]:focus,
+        input[type="number"]:focus,
+        input[type="tel"]:focus,
+        input[type="search"]:focus,
+        textarea:focus,
+        select:focus,
+        .vTextField:focus,
+        .select2-selection:focus, /* More common for select2 focus trigger */
+        .select2-container--focus .select2-selection { /* More specific for Select2's focused state */
+            outline: none !important; /* Option 1: Completely remove */
+            border: 1px solid #a21616;
+            box-shadow: 0 0 4px #8f4848, 0 0 4px #8f4848;
+        }
+
+        #nav-filter {
+            color: #fff;
+            border-radius: 3px;
+        }
+
+        #nav-sidebar .current-model a {
+            font-weight: bold;
+        }
+        
+        #nav-sidebar .current-model {
+            background: var(--primary);
+        }
+
+        .datetimeshortcuts .date-icon {
+            background: url(../img/icon-calendar-red.svg) 0 0 no-repeat;
+            background-size: auto;
+            background-size: 24px auto;
+            top: -1px;
+        }
+
+        .calendar td.selected a {
+            background: var(--primary);
+        }
+
+}
+
+
+/* You might need to adjust some specific Django Admin elements if they don't fully utilize these variables */
+/* Example: Forcing header text color if it doesn't pick up --header-link-color correctly */
+html[data-theme="dark"] #header #branding a,
+html[data-theme="dark"] #header a:link,
+html[data-theme="dark"] #header a:visited {
+    /* color: var(--header-link-color); */
+    color: #d4af37;
+}
+html[data-theme="dark"] #header{
+    background :#0b1d3a;/*#5d1111*/
+}
+
+
+/* Example: sidebar text colors if needed */
+html[data-theme="dark"] #nav-sidebar .module caption,
+html[data-theme="dark"] #nav-sidebar .module th,
+html[data-theme="dark"] #nav-sidebar .module a {
+    color: #fff; /* var(--header-link-color) Or a specific sidebar text variable */
+}
+/* html[data-theme="dark"] #nav-sidebar .module caption a {
+    color: #C01414; 
+} */
+html[data-theme="dark"] #nav-sidebar caption .section:link, html[data-theme="dark"]  #nav-sidebar caption .section:visited {
+    color: #d4af37 !important;
+    font-weight: bold;
+}
+html[data-theme="dark"] #nav-sidebar .current-model a:hover{
+    color: #fff !important;
+}
+html[data-theme="dark"] #nav-sidebar .module a:hover {
+    color: var(--link-hover-color); /* Or a specific sidebar link hover variable */
+}
+
+/*for theme selecter*/
+html[data-theme="dark"] .theme-toggle svg.theme-icon-when-auto, 
+html[data-theme="dark"] .theme-toggle svg.theme-icon-when-dark,
+html[data-theme="dark"] .theme-toggle svg.theme-icon-when-light {
+   fill: #fff;
+  color: #0b1d3a; 
+}
+
+html[data-theme="dark"] .calendar caption, .calendarbox h2 {
+    margin: 0;
+    text-align: center;
+    border-top: none;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #ffffff;
+    background: var(--primary);
+}
+
+/* html[data-theme="dark"] .theme-toggle svg.theme-icon-when-auto, .theme-toggle svg.theme-icon-when-dark, .theme-toggle svg.theme-icon-when-light
+Specificity: (0,2,1)
+ {
+    fill: var(--header-link-color);
+    color: var(--header-bg);
+} */
+
+#site-name {
+    font-weight: 600;
+}
+#nav-sidebar .current-app .section:link, #nav-sidebar .current-app .section:visited {
+    color: var(--header-color);
+    font-weight: bold;
+}
+.module caption a{
+    font-weight: bold;
+}
+#nav-filter {
+    padding: 6px 5px;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #262626;
+  --bg-secondary: #121111;
+  --bg-tertiary: #080808;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #ffffff;
+  --border-color: #334155;
+  --border-light: #475569;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --hover-bg: #334155;
+  --accent: #a72828;
+  --success: #10b981;
+  --warning: #f50b0b;
+  --info: #3b82f6;
+}

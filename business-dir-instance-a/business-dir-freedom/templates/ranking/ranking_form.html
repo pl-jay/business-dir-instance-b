@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load form_extras %}
+{% block title %}{% if form.instance.pk %}Edit Ranking{% else %}Create Ranking{% endif %} · Patriot{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+          <!-- Header + Back -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h4 mb-0">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Ranking</h1>
+            <a class="btn btn-outline-secondary btn-sm"
+               href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'/' }}">
+              ← Back
+            </a>
+          </div>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next|default:request.META.HTTP_REFERER }}">
+
+            {{ form.non_field_errors }}
+
+            <div class="row g-3">
+              <!-- Business -->
+              <div class="col-12">
+                <label class="form-label" for="{{ form.business.id_for_label }}">Business</label>
+                {{ form.business|add_class:"form-select" }}
+                {% if form.business.errors %}
+                  <div class="text-danger small mt-1">{{ form.business.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Score -->
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="{{ form.score.id_for_label }}">Score (1–5)</label>
+                <input type="number" name="{{ form.score.html_name }}"
+       id="{{ form.score.id_for_label }}"
+       class="form-control"
+       min="1" max="5" step="1" inputmode="numeric">
+                {% if form.score.errors %}
+                  <div class="text-danger small mt-1">{{ form.score.errors }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Comment -->
+              <div class="col-12">
+                <label class="form-label" for="{{ form.comment.id_for_label }}">Comment</label>
+                {{ form.comment|add_class:"form-control" }}
+                {% if form.comment.errors %}
+                  <div class="text-danger small mt-1">{{ form.comment.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <a class="btn btn-outline-secondary"
+                 href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'/' }}">
+                Cancel
+              </a>
+              <button class="btn btn-primary" type="submit">
+                <i class="fa-regular fa-floppy-disk me-1"></i> Save
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
