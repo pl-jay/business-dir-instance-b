@@ -18,9 +18,6 @@ from .models import OwnerReply, Review, ReviewAttachment, ReviewVote, ReviewRepo
 from .forms import ReviewForm, ReviewUpdateForm, ReviewReportForm
 from django.db.models import Exists, OuterRef, Count, Q
 from django.views.generic import ListView
-# Note: Review is imported from .models above; avoid re-importing here to
-# prevent shadowing.  ReviewAttachment, ReviewVote and ReviewReport are
-# imported via the models import above.
 from apps.wallets.models import UserWallet
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
@@ -138,20 +135,6 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         fallback = self.object.business.get_absolute_url()
         return next_url or referrer or fallback
 
-    # def form_valid(self, form):
-    #     # Associate the business and current user
-    #     form.instance.business = self.business
-    #     form.instance.user = self.request.user
-    #     response = super().form_valid(form)
-    #     # After saving the review instance, persist any uploaded attachments
-    #     files = self.request.FILES.getlist("attachments")
-    #     for f in files:
-    #         ReviewAttachment.objects.create(review=self.object, file=f)
-    #     return response
-
-    # def get_success_url(self):
-    #     return reverse("directory:detail", kwargs={"slug": self.object.business.slug})
-
 
 class ReviewUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
     model = Review
@@ -181,9 +164,6 @@ class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
         """
         return reverse("directory:detail", kwargs={"slug": self.object.business.slug})
 
-    # Soft‑delete reviews instead of removing them from the database.  This
-    # preserves relationships (e.g. signatures) and avoids broken
-    # references in business statistics.
     def delete(self, request, *args, **kwargs):  # type: ignore[override]
         self.object = self.get_object()
         self.object.is_hidden = True
